@@ -1,4 +1,5 @@
 name: Build Android Code Studio
+# Mini: workflow aktif untuk push ke main + lite/** (repo galaxya06hype-creator/Android-Code-Studio-Mini).
 
 on:
   push:
