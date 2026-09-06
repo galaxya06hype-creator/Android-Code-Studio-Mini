@@ -38,8 +38,11 @@ import org.gradle.api.provider.Provider
  *
  * For example, if the base version code of the IDE is 270 (for v2.7.0), then for arm64-v8a flavor,
  * the version code will be `100 * 270 + 1` i.e. `27001`
+ *
+ * LITE (Mini): ARM64 SAJA — khusus dan utama untuk HP RAM 2GB+ modern (semua HP 2017+
+ * sudah arm64). HP 32-bit lawas (armeabi-v7a) tidak didukung varian ini.
  */
-internal val flavorsAbis = mapOf("arm64-v8a" to 0, "armeabi-v7a" to 0)
+internal val flavorsAbis = mapOf("arm64-v8a" to 0)
 
 fun Project.configureAndroidModule(coreLibDesugDep: Provider<MinimalExternalModuleDependency>) {
   val isAppModule = plugins.hasPlugin("com.android.application")
@@ -122,7 +125,7 @@ fun Project.configureAndroidModule(coreLibDesugDep: Provider<MinimalExternalModu
           reset()
           isEnable = true
           isUniversalApk = false
-          include("arm64-v8a", "armeabi-v7a")
+          include("arm64-v8a")
         }
       }
 
@@ -144,7 +147,7 @@ fun Project.configureAndroidModule(coreLibDesugDep: Provider<MinimalExternalModu
             val verCodeIncr = flavorsAbis[abiIdentifier]
             if (verCodeIncr == null) {
               throw UnsupportedOperationException(
-                  "Unsupported ABI: $abiIdentifier. Only ARM architectures are supported: ${flavorsAbis.keys.joinToString()}"
+                  "Unsupported ABI: $abiIdentifier. Mini ringan ini khusus arm64-v8a."
               )
             }
 

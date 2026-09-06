@@ -178,10 +178,9 @@ android {
                 val variantName = variant.name.lowercase()
                 when {
                   variantName.contains("arm64") -> "arm64-v8a"
-                  variantName.contains("armeabi") || variantName.contains("arm7") -> "armeabi-v7a"
                   else -> {
-                    // Flavor variants (lite/full) carry no ABI filter; fall back to
-                    // 'universal' instead of failing variant configuration.
+                    // Mini khusus ARM64: varian tanpa filter ABI (mis. flavor lite/full
+                    // tanpa split) pakai suffix 'universal' agar konfigurasi tidak throw.
                     println(
                         "No ABI filter for variant: $variantName, using 'universal' suffix."
                     )
@@ -190,9 +189,10 @@ android {
                 }
               }
 
-      if (archSuffix !in listOf("arm64-v8a", "armeabi-v7a", "universal")) {
+      // Mini khusus ARM64: hanya arm64-v8a (+ universal untuk varian flavor tanpa split).
+      if (archSuffix !in listOf("arm64-v8a", "universal")) {
         throw IllegalStateException(
-            "Unsupported architecture: $archSuffix. Only arm64-v8a, armeabi-v7a and universal (flavor lite/full) are supported."
+            "Unsupported architecture: $archSuffix. Mini ini khusus arm64-v8a."
         )
       }
 
