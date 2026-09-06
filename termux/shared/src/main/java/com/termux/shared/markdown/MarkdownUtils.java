@@ -200,14 +200,20 @@ public class MarkdownUtils {
 
     public static Spanned getSpannedMarkdownText(Context context, String string) {
         if (context == null || string == null) return null;
-        // Stage-2 lite anti-FC/OOM: Markwon bisa berat di RAM 2GB. Fallback null agar
-        // pemanggil tampilkan teks polos, jangan Force Close.
+        // Stage-2 lite anti-FC/OOM: Markwon bisa berat di RAM 2GB. Fallback ke teks polos
+        // (SpannedString) agar notifikasi tetap tampil sempurna, jangan Force Close.
+        // Pemanggil (crash/plugin notification builder) aman menerima Spanned apa pun:
+        // setContentText()/BigTextStyle.bigText() menerima null/CharSequence tanpa NPE.
         try {
             final Markwon markwon = getSpannedMarkwonBuilder(context);
-            if (markwon == null) return null;
+            if (markwon == null) return android.text.SpannedString.valueOf(string);
             return markwon.toMarkdown(string);
         } catch (Throwable t) {
-            return null;
+            try {
+                return android.text.SpannedString.valueOf(string);
+            } catch (Throwable t2) {
+                return null;
+            }
         }
     }
 
