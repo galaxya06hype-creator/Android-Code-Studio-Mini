@@ -61,8 +61,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Generating missing dirs
-        run: mkdir -p /home/runner/work/android-code-studio/android-code-studio/core/app/build/intermediates/external_file_lib_dex_archives/debug/desugarDebugFileDependencies && mkdir -p /home/runner/work/android-code-studio/android-code-studio/core/app/build/intermediates/l8_art_profile/release/l8DexDesugarLibRelease
+      - name: Generating missing dirs (termasuk varian flavor lite/full)
+        run: |
+          BASE="$GITHUB_WORKSPACE/core/app/build/intermediates"
+          for V in liteDebug liteRelease fullDebug fullRelease debug release; do
+            C="$(echo "${V:0:1}" | tr '[:lower:]' '[:upper:]')${V:1}"
+            mkdir -p "$BASE/external_file_lib_dex_archives/$V/desugar${C}FileDependencies"
+            mkdir -p "$BASE/l8_art_profile/$V/l8DexDesugarLib${C}"
+          done
 
       - name: Change Gradle wrapper permissions
         run: chmod +x ./gradlew
