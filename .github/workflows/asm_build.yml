@@ -105,11 +105,15 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Ensure debug keystore (fallback bila tanpa secrets)
+        # AGP 8 di runner Ubuntu 24.04 mencari di $XDG_CONFIG_HOME/.android (bukan ~/.android)
         run: |
-          mkdir -p ~/.android
-          if [ ! -f ~/.android/debug.keystore ]; then
-            keytool -genkeypair -keystore ~/.android/debug.keystore -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10950 -dname "CN=Android Debug,O=Android,C=US"
-          fi
+          for D in "$HOME/.android" "$HOME/.config/.android"; do
+            mkdir -p "$D"
+            if [ ! -f "$D/debug.keystore" ]; then
+              keytool -genkeypair -keystore "$D/debug.keystore" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10950 -dname "CN=Android Debug,O=Android,C=US"
+            fi
+          done
+          ls -la "$HOME/.android/debug.keystore" "$HOME/.config/.android/debug.keystore"
 
       - name: Create local.properties (hanya bila secrets ada)
         if: steps.secrets.outputs.has_release == 'true'
