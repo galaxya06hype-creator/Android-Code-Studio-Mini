@@ -1,15 +1,16 @@
-# LITE Termux Audit (Agent-2) — 2026-09-06
+# LITE Termux Audit (Agent-2) — 2026-09-06 (update: arm64-only, branch lite/ram2gb-lite)
 
-Branch: `dev` (branch `lite/ram2gb-lite` belum ada — kerja di `dev`, tanpa buat branch tandingan).
+Branch: `lite/ram2gb-lite` (audit awal di `dev`).
 Tujuan: pangkas dependency/download Termux seminimal mungkin, tetap bisa build **Kotlin dan Java via Gradle**.
-Batasan: `generativeai` (`com.google.ai.client.generativeai:generativeai:0.9.0`, `core/app/build.gradle.kts:267`) **WAJIB dipertahankan, tidak disentuh**.
+Batasan: `generativeai` (`com.google.ai.client.generativeai:generativeai:0.9.0`, `core/app/build.gradle.kts`) **WAJIB dipertahankan, tidak disentuh**.
+Update Mini: native termux kini khusus `arm64-v8a` (lihat `termux/*/build.gradle.kts`).
 
 ## 1. File yang dibaca (16)
 
 | # | File | Temuan kunci |
 |---|------|--------------|
 | 1 | `termux/application/build.gradle.kts` | lib, deps: androidx annotation/core/drawer/preference/viewpager, material, guava, markwon x4, `core.projects/common/resources`, `termux.view`, `termux.shared`, `utilities.preferences` |
-| 2 | `termux/emulator/build.gradle.kts` | lib `com.termux.emulator`, NDK 27.1.12297006 (arm64+arm), deps HANYA `androidx.annotation` — paling ringan |
+| 2 | `termux/emulator/build.gradle.kts` | lib `com.termux.emulator`, NDK 27.1.12297006 arm64-only (Mini), deps HANYA `androidx.annotation` — paling ringan |
 | 3 | `termux/shared/build.gradle.kts` | lib `com.termux.shared`, NDK 27.1.12297006, deps: appcompat/annotation/core, `window-v1alpha9` (komentar: JANGAN naik >1.0.0-alpha09, brk 58-59), markwon x4, material, guava, hiddenApiBypass, `commons-io` (60), **`common.termuxAmLib` v2.0.0 (61)**, core.common/resources, termux.view, buildInfo, preferences |
 | 4 | `termux/view/build.gradle.kts` | lib `com.termux.view`, `api(projects.termux.emulator)` + annotation + core.resources — ringan |
 | 5 | `gradle/libs.versions.toml:95` | `common-termuxAmLib = { module = "com.termux:termux-am-library", version = "v2.0.0" }` — TIDAK dihapus (sesuai instruksi), hanya kandidat |

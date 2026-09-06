@@ -33,14 +33,14 @@ git commit -m "lite(agent-5): verifikasi ringan + PUSH_CHECKLIST.md"
 - [ ] `./gradlew :core:app:tasks --offline --dry-run --max-workers=2` — BELUM HIJAU (lingkungan ini tanpa Java/SDK: `JAVA_HOME not set`). Wajib hijau di mesin builder (JDK 17 + SDK) sebelum push.
 - [ ] `assembleLiteDebug` / `assembleDebug --max-workers=2 --offline` — BELUM dicoba (OOM risk). Wajib minimal `assembleDebug` hijau di builder.
 
-## 4. Conflict / inkonsistensi yang HARUS dibereskan sebelum push
-1. `dimension = "mode"` (snippet komentar Agent-4) vs `dimension = "tier"` (flavor nyata Agent-3) — samakan ke `"tier"`, atau hapus snippet contoh.
-2. Snippet Agent-4 berisi contoh `productFlavors { create("lite") }` yang dikomen — JANGAN di-uncomment apa adanya (duplikat flavor). Hapus atau tandai deprecated.
-3. `LITE_BUILD.md` §2/§39 klaim "flavor belum ada" — kadaluarsa, flavor `lite`/`full` sudah ada. Update sebelum push.
-4. `fullImplementation` (BlurView, seasonal, charts, SilentInstaller, appintro, idestats, logsender, uidesigner, xmlInflater) — call-site Java/Kotlin BELUM di-guard `LiteMode.isLowRam()`. Varian `lite` berisiko `ClassNotFound` / compile error. Guard dulu atau kembalikan ke `implementation` sementara.
-5. `applicationVariants` fallback `"universal"` — pesan error masih sebut "Only arm64..." — perbaiki teks atau logika penamaan APK universal.
-6. `gradle.properties.lite`: `nonTransitiveRClass=true` vs asli `false` + TODO Migrate — uji `full` variant tetap kompilasi.
-7. Laporan: `LITE_BASELINE.md` (Agent-1) + `LITE_BUILD.md` (Agent-4) ADA. `LITE_TERMUX_AUDIT.md` (Agent-2), `LITE_FEATURES.md` (Agent-3) masih BELUM ada saat cek awal — minta dilengkapi sebelum PR. (`proguard-rules.pro` juga diubah Agent-3: keep LiteMode + generativeai — review.)
+## 4. Conflict / inkonsistensi — STATUS (update pasca 5-agent audit)
+1. ~~`dimension = "mode"` vs `"tier"`~~ SELESAI: snippet + flavor nyata sama-sama `"tier"`.
+2. ~~Snippet duplikat `create("lite")`~~ SELESAI: snippet hanya `getByName("lite")` berkomentar.
+3. ~~`LITE_BUILD.md` klaim "flavor belum ada"~~ SELESAI: flavor `lite`/`full` commit.
+4. ~~`fullImplementation` tanpa guard~~ SELESAI (Stage-1 safe): kembali `implementation`; flip = Stage-2.
+5. ~~Pesan error "Only arm64..."~~ SELESAI: kini "Mini ini khusus arm64-v8a".
+6. `gradle.properties.lite`: `nonTransitiveRClass=true` vs asli `false` — masih perlu uji varian `full` di CI.
+7. ~~Laporan belum ada~~ SELESAI: keempat `LITE_*.md` + checklist ini ada dan sinkron.
 
 ## 5. Remote & PR (JANGAN dijalankan sebelum seksi 3–4 hijau)
 Remote saat ini = upstream resmi (`AndroidCSOfficial/android-code-studio`), BUKAN fork. Jangan push langsung:

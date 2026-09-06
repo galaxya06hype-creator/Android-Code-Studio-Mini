@@ -94,16 +94,20 @@ android {
 
   signingConfigs {
       create("custom") {
-          val keyStorePath = "${rootProject.projectDir}/signing/signing-key.jks"
-          val keyStoreFile = file(keyStorePath)
-          
           val signing_storePassword = System.getenv("SIGNING_STORE_PASSWORD") ?: ""
           val signing_keyPassword = System.getenv("SIGNING_KEY_PASSWORD") ?: ""
-          
-          storeFile = keyStoreFile
-          storePassword = signing_storePassword
-          keyAlias = "androidcs"
-          keyPassword = signing_keyPassword
+
+          if (signing_storePassword.isBlank() || signing_keyPassword.isBlank()) {
+              // Mini/fork tanpa secrets: pakai debug keystore agar build tetap hijau.
+              // Upstream dengan secrets tetap pakai signing-key.jks (cabang else).
+              initWith(signingConfigs.getByName("debug"))
+          } else {
+              val keyStorePath = "${rootProject.projectDir}/signing/signing-key.jks"
+              storeFile = file(keyStorePath)
+              storePassword = signing_storePassword
+              keyAlias = "androidcs"
+              keyPassword = signing_keyPassword
+          }
       }
   }
 

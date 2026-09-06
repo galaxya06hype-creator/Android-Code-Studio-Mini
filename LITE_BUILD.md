@@ -21,10 +21,8 @@ cp gradle.properties.lite gradle.properties
 
 # build lite debug, batasi worker (RAM 2GB)
 ./gradlew :core:app:assembleLiteDebug --max-workers=2 --offline
-# atau jika flavor lite belum ada (Agent-3 belum selesai), pakai debug biasa:
-./gradlew :core:app:assembleDebug --max-workers=2 --offline
 
-# varian lain (setelah flavor lite ada):
+# varian lain (flavor lite/full dimensi tier sudah ada):
 ./gradlew :core:app:assembleLiteRelease --max-workers=2
 ./gradlew :core:app:assembleArm64V8aLiteDebug --max-workers=2
 
@@ -36,7 +34,7 @@ cp gradle.properties.lite gradle.properties
 cp gradle.properties.bak gradle.properties
 ```
 
-> `assembleLiteDebug` butuh `productFlavors { create("lite") }` Agent-3 — saat ini sudah ada di working tree (dimensi `tier`, uncommitted). Jika checkout bersih tanpa itu, pakai `assembleDebug`.
+> `assembleLiteDebug` memakai flavor `lite` dimensi `tier` (sudah commit). CI Mini membangun `assembleLite${BUILD_TYPE}` (lihat `asm_build.yml`).
 
 ## 3. Sebelum vs sesudah
 

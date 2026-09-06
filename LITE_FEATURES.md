@@ -47,9 +47,9 @@ full-only wajib di-guard dengan `LiteMode.isLowRam()`, baru flip ke `fullImpleme
    — `object LiteMode { ENABLED, isLowRam(context), memoryClassMb(context) }`.
    Dipilih `ideconfigurations` (Android library, ada `Context`);
    `utilities/shared` JVM murni sehingga tidak cocok.
-2. UBAH: `core/app/build.gradle.kts` — flavor `lite`/`full` (72-90),
-   fallback `universal` (183-193), 9 dep berat → `fullImplementation`
-   (236-347).
+2. UBAH: `core/app/build.gradle.kts` — flavor `lite`/`full`,
+   fallback `universal`, 9 kandidat berat masih `implementation`
+   (Stage-1 safe; flip ke `fullImplementation` = Stage-2 setelah guard).
 3. APPEND: `core/app/proguard-rules.pro` (156-161) — keep `LiteMode` +
    `generativeai`.
 
