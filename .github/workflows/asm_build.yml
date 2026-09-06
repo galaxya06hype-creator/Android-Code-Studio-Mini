@@ -67,6 +67,27 @@ jobs:
       - name: Change Gradle wrapper permissions
         run: chmod +x ./gradlew
 
+      - name: Check release secrets
+        id: secrets
+        run: |
+          if [ -n "${{ secrets.SIGNING_STORE_PASSWORD }}" ] && [ -n "${{ secrets.SIGNING_KEY_PASSWORD }}" ]; then
+            echo "has_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Cache Android NDK 27.1.12297006
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/lib/android/sdk/ndk/27.1.12297006
+          key: ${{ runner.os }}-ndk-27.1.12297006-v1
+
+      - name: Install NDK 27.1.12297006 + accept licenses
+        run: |
+          ls "$ANDROID_HOME/ndk/" || true
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.1.12297006" "platforms;android-34" "build-tools;35.0.0"
+
       - name: Restore cache
         uses: actions/cache@v4
         with:
@@ -77,25 +98,44 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Create local.properties
+      - name: Ensure debug keystore (fallback bila tanpa secrets)
+        run: |
+          mkdir -p ~/.android
+          if [ ! -f ~/.android/debug.keystore ]; then
+            keytool -genkeypair -keystore ~/.android/debug.keystore -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10950 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Create local.properties (hanya bila secrets ada)
+        if: steps.secrets.outputs.has_release == 'true'
         run: |
           echo "signing.storeFile=signing/signing-key.jks" >> local.properties
           echo "signing.storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> local.properties
           echo "signing.keyAlias=androidcs" >> local.properties
           echo "signing.keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> local.properties
 
-      - name: Assemble APK (Mini: hanya flavor lite arm64 agar cepat)
+      - name: Assemble Lite Debug (wajib hijau)
+        run: ./gradlew :core:app:assembleLiteDebug
+
+      - name: Assemble Lite Release (best-effort, debug-signed bila tanpa secrets)
         env:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew :core:app:assembleLite${{ env.BUILD_TYPE }}
+        run: ./gradlew :core:app:assembleLiteRelease
 
       - name: List APK files
-        run: ls -la core/app/build/outputs/apk/lite/${{ env.BUILD_TYPE_LOWER }}/ || echo "Directory not found"
+        run: ls -la core/app/build/outputs/apk/lite/debug/ core/app/build/outputs/apk/lite/release/ || true
 
-      - name: Upload arm64-v8a APK
+      - name: Upload Debug arm64-v8a APK (wajib ada)
         uses: actions/upload-artifact@v4
         with:
-          name: apk-arm64-v8a-${{ env.BUILD_TYPE_LOWER }}
-          path: core/app/build/outputs/apk/lite/${{ env.BUILD_TYPE_LOWER }}/*arm64-v8a*.apk
+          name: apk-arm64-v8a-debug
+          path: core/app/build/outputs/apk/lite/debug/*arm64-v8a*.apk
+        if: always()
+
+      - name: Upload Release arm64-v8a APK (opsional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-arm64-v8a-release
+          path: core/app/build/outputs/apk/lite/release/*arm64-v8a*.apk
+          if-no-files-found: warn
         if: always()

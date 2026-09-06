@@ -38,6 +38,13 @@ class SigningConfigPlugin : Plugin<Project> {
         return
       }
 
+      // Mini: tolak konfigurasi berpassword kosong (tanda secrets absen di fork).
+      // Tanpa guard ini password kosong bisa menimpa fallback debug-keystore di modul app.
+      if (signing.storePassword.isBlank() || signing.keyPassword.isBlank()) {
+        logger.lifecycle("Signing passwords are blank, keeping existing signing config")
+        return
+      }
+
       val signingKey = file(signing.storeFile)
       if (!signingKey.exists()) {
         return
